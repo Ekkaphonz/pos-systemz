@@ -1,0 +1,106 @@
+<!DOCTYPE html>
+<!-- ============================================================
+     FILE: login.html
+     Admin Login Page
+     ============================================================ -->
+<html lang="lo">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>ເຂົ້າສູ່ລະບົບ — School Sale POS</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Noto+Sans+Lao:wght@400;500;600;700;800;900&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="css/style.css">
+</head>
+<body>
+
+  <div class="login-page">
+    <div class="login-card">
+
+      <div class="login-logo">🏫</div>
+      <h1>School Sale POS</h1>
+      <p class="sub">ເຂົ້າສູ່ລະບົບຜູ້ດູແລ</p>
+
+      <!-- Error message (shown on wrong credentials) -->
+      <div class="login-error" id="loginError">
+        ❌ ຊື່ຜູ້ໃຊ້ ຫຼື ລະຫັດຜ່ານບໍ່ຖືກຕ້ອງ
+      </div>
+
+      <!-- Username -->
+      <div class="login-field">
+        <label for="loginUser">ຊື່ຜູ້ໃຊ້</label>
+        <input
+          type="text"
+          id="loginUser"
+          placeholder="ໃສ່ຊື່ຜູ້ໃຊ້"
+          autocomplete="username"
+          autocapitalize="none"
+        >
+      </div>
+
+      <!-- Password -->
+      <div class="login-field">
+        <label for="loginPass">ລະຫັດຜ່ານ</label>
+        <input
+          type="password"
+          id="loginPass"
+          placeholder="ໃສ່ລະຫັດຜ່ານ"
+          autocomplete="current-password"
+        >
+      </div>
+
+      <!-- Login button -->
+      <button class="btn-login" id="loginBtn">🔐 ເຂົ້າສູ່ລະບົບ</button>
+
+      <!-- Default credentials hint -->
+      <div class="login-hint">
+        🔑 ຄ່າເລີ່ມຕົ້ນ: <strong>admin</strong> / <strong>school2025</strong>
+      </div>
+
+    </div>
+  </div>
+
+  <script type="module" src="js/auth.js"></script>
+  <script type="module">
+    // If already logged in, go straight to admin
+    if (isLoggedIn()) {
+      window.location.href = 'admin.html';
+    }
+
+    // Initialize default credentials on first visit
+    initCredentials();
+
+    // Handle login form submission
+    function handleLogin() {
+      const username = document.getElementById('loginUser').value.trim();
+      const password = document.getElementById('loginPass').value;
+      const errorEl  = document.getElementById('loginError');
+
+      if (!username || !password) {
+        errorEl.textContent = '⚠️ ກະລຸນາໃສ່ຊື່ຜູ້ໃຊ້ ແລະ ລະຫັດຜ່ານ';
+        errorEl.classList.add('show');
+        return;
+      }
+
+      if (attemptLogin(username, password)) {
+        window.location.href = 'admin.html';
+      } else {
+        errorEl.textContent = '❌ ຊື່ຜູ້ໃຊ້ ຫຼື ລະຫັດຜ່ານບໍ່ຖືກຕ້ອງ';
+        errorEl.classList.add('show');
+        document.getElementById('loginPass').value = '';
+        document.getElementById('loginPass').focus();
+      }
+    }
+
+    // Click handler
+    document.getElementById('loginBtn').addEventListener('click', handleLogin);
+
+    // Press Enter to submit
+    document.addEventListener('keydown', e => {
+      if (e.key === 'Enter') handleLogin();
+    });
+  </script>
+
+</body>
+</html>

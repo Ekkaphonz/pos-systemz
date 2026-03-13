@@ -1,0 +1,287 @@
+<!DOCTYPE html>
+<!-- ============================================================
+     FILE: admin.html
+     Admin Dashboard — Sales Summary + Stock Management
+     ============================================================ -->
+<html lang="lo">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>📊 Admin — School Sale POS</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Noto+Sans+Lao:wght@400;500;600;700;800;900&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="css/style.css">
+</head>
+<body>
+
+  <!-- ── Header ─────────────────────────────────────────── -->
+  <header class="app-header">
+    <h1>📊 <span class="accent">Admin</span> Dashboard</h1>
+    <nav class="header-nav">
+      <a href="index.html">🛒 ຂາຍ</a>
+      <a href="admin.html" class="active">📊 Admin</a>
+      <button class="btn-logout" onclick="logout()">🚪 ອອກ</button>
+    </nav>
+  </header>
+
+  <!-- ── Admin Content ──────────────────────────────────── -->
+  <div class="admin-container">
+
+    <!-- ① Daily Sales Summary -->
+    <div class="admin-section">
+      <div class="admin-section-title">
+        📈 ສະຫຼຸບຍອດຂາຍ
+      </div>
+
+      <div class="stats-grid" id="statsGrid">
+        <div class="stat-card c-green">
+          <div class="s-lbl">💰 ລາຍໄດ້ລວມ</div>
+          <div class="s-val" id="statRevenue">0 KIP</div>
+        </div>
+        <div class="stat-card c-blue">
+          <div class="s-lbl">📦 ຈຳນວນອໍເດີ</div>
+          <div class="s-val" id="statOrders">0</div>
+        </div>
+        <div class="stat-card c-amber">
+          <div class="s-lbl">🛍️ ສິນຄ້າທີ່ຂາຍ</div>
+          <div class="s-val" id="statItems">0</div>
+        </div>
+        <div class="stat-card c-purple">
+          <div class="s-lbl">🏆 ຂາຍດີທີ່ສຸດ</div>
+          <div class="s-val" id="statBest" style="font-size:1rem;">—</div>
+        </div>
+        <div class="stat-card c-green">
+          <div class="s-lbl">💵 ເງິນສົດ</div>
+          <div class="s-val" id="statCash">0 KIP</div>
+        </div>
+        <div class="stat-card c-blue">
+          <div class="s-lbl">📱 ໂອນເງິນ</div>
+          <div class="s-val" id="statTransfer">0 KIP</div>
+        </div>
+        <div class="stat-card c-amber">
+          <div class="s-lbl">🧾 VAT ທີ່ເກັບໄດ້</div>
+          <div class="s-val" id="statVAT">0 KIP</div>
+        </div>
+      </div>
+    </div>
+
+    <!-- ② Action Buttons -->
+    <div class="admin-section">
+      <div class="action-row">
+        <button class="btn-action blue" onclick="exportCSV()">
+          📥 Export CSV
+        </button>
+        <button class="btn-action red" onclick="confirmClear()">
+          🗑️ ລຶບຂໍ້ມູນທັງໝົດ
+        </button>
+      </div>
+    </div>
+
+    <!-- ③ Stock Management -->
+    <div class="admin-section">
+      <div class="admin-section-title">
+        📦 ຈັດການສະຕ໋ອກ
+        <button class="btn-action green" style="font-size:0.8rem; padding:6px 14px;" onclick="restockAll()">
+          ➕ ເຕີມທັງໝົດ (+50)
+        </button>
+      </div>
+
+      <div style="overflow-x:auto;">
+        <table class="stock-table" id="stockTable">
+          <thead>
+            <tr>
+              <th>ສິນຄ້າ</th>
+              <th>ລາຄາ</th>
+              <th>ສະຕ໋ອກ</th>
+              <th>ເຕີມ (+)</th>
+              <th>ຕັ້ງໃໝ່</th>
+            </tr>
+          </thead>
+          <tbody id="stockBody">
+            <!-- Rendered by JS -->
+          </tbody>
+        </table>
+      </div>
+    </div>
+
+    <!-- ④ Order History -->
+    <div class="admin-section">
+      <div class="admin-section-title">
+        🧾 ປະຫວັດອໍເດີ
+      </div>
+      <div id="ordersList">
+        <!-- Rendered by JS -->
+      </div>
+    </div>
+
+  </div>
+
+  <!-- Toast -->
+  <div id="toast"></div>
+
+  <!-- Scripts -->
+  <script type="module" src="js/auth.js"></script>
+  <script type="module" src="js/storage.js"></script>
+  <script type="module">
+    /* ============================================================
+       Admin page — authentication guard + all render logic
+       ============================================================ */
+
+    // ── Auth guard: redirect to login if not authenticated ──
+    requireLogin();
+
+    // ── Products list (mirrors pos.js — kept in sync manually) ──
+    const ADMIN_PRODUCTS = [
+      { id: 1,  name: "ເຂົ້າຈີ່ທຳມະດາ",  price: 12000, icon: "🍞" },
+      { id: 2,  name: "ເຂົ້າຈີ່ເນີຍ",    price: 13000, icon: "🥐" },
+      { id: 3,  name: "ເຂົ້າຈີ່ຍາວ",     price: 13000, icon: "🥖" },
+      { id: 4,  name: "ເຂົ້າຈີ່ໄຂ່",     price: 15000, icon: "🥯" },
+      { id: 5,  name: "ເຂົ້າຈີ່ສາລີ",    price: 15000, icon: "🌽" },
+      { id: 6,  name: "ເຂົ້າຈີ່ນ້ຳຕານ",  price: 13000, icon: "🍯" },
+      { id: 7,  name: "ເຂົ້າຈີ່ທອດ",     price: 18000, icon: "🥪" },
+      { id: 8,  name: "ເຂົ້າສາລີທອດ",    price: 20000, icon: "🥟" },
+      { id: 9,  name: "ໝູເດັ່ນທອດ",      price: 25000, icon: "🥟" },
+      { id: 10, name: "ແປ້ງທອດໄສ້ຜັກ",  price: 20000, icon: "🥟" },
+    ];
+
+    /* ── Formatter ─────────────────────────────────────── */
+    function fKIP(n) { return n.toLocaleString('en-US') + ' KIP'; }
+
+    function formatTime(iso) {
+      return new Date(iso).toLocaleString('en-GB', {
+        day: '2-digit', month: 'short', year: '2-digit',
+        hour: '2-digit', minute: '2-digit',
+      });
+    }
+
+    /* ── Render Stats ──────────────────────────────────── */
+    function renderStats() {
+      document.getElementById('statRevenue').textContent  = fKIP(getTotalRevenue());
+      document.getElementById('statOrders').textContent   = getOrderCount();
+      document.getElementById('statItems').textContent    = getTotalItemsSold();
+      document.getElementById('statBest').textContent     = getBestSeller();
+      document.getElementById('statCash').textContent     = fKIP(getCashRevenue());
+      document.getElementById('statTransfer').textContent = fKIP(getTransferRevenue());
+      document.getElementById('statVAT').textContent      = fKIP(getTotalVAT());
+    }
+
+    /* ── Render Stock Table ────────────────────────────── */
+    function renderStock() {
+      const tbody = document.getElementById('stockBody');
+      tbody.innerHTML = '';
+
+      ADMIN_PRODUCTS.forEach(p => {
+        const stock = getStock(p.id);
+        let pillClass = stock === 0 ? 'zero' : stock <= 5 ? 'low' : 'ok';
+        let pillText  = stock === 0 ? 'ໝົດ' : stock <= 5 ? `ໃກ້ໝົດ (${stock})` : stock;
+
+        const tr = document.createElement('tr');
+        tr.innerHTML = `
+          <td><strong>${p.icon} ${p.name}</strong></td>
+          <td>${fKIP(p.price)}</td>
+          <td><span class="stock-pill ${pillClass}">${pillText}</span></td>
+          <td>
+            <input type="number" class="stock-input" id="addQty_${p.id}"
+              value="10" min="1" max="999">
+            <button class="btn-stock-add" onclick="handleAddStock(${p.id})">+ເຕີມ</button>
+          </td>
+          <td>
+            <input type="number" class="stock-input" id="setQty_${p.id}"
+              value="${stock}" min="0" max="9999">
+            <button class="btn-stock-set" onclick="handleSetStock(${p.id})">ຕັ້ງ</button>
+          </td>
+        `;
+        tbody.appendChild(tr);
+      });
+    }
+
+    /* ── Stock Actions ─────────────────────────────────── */
+    function handleAddStock(productId) {
+      const input = document.getElementById(`addQty_${productId}`);
+      const qty   = parseInt(input.value) || 0;
+      if (qty <= 0) return;
+      addStock(productId, qty);
+      renderStock();
+      showToast(`✅ ເຕີມສະຕ໋ອກ ${qty} ຊິ້ນ`);
+    }
+
+    function handleSetStock(productId) {
+      const input = document.getElementById(`setQty_${productId}`);
+      const qty   = parseInt(input.value);
+      if (isNaN(qty) || qty < 0) return;
+      setStock(productId, qty);
+      renderStock();
+      showToast(`✅ ຕັ້ງສະຕ໋ອກເປັນ ${qty} ຊິ້ນ`);
+    }
+
+    function restockAll() {
+      ADMIN_PRODUCTS.forEach(p => addStock(p.id, 50));
+      renderStock();
+      showToast('✅ ເຕີມສະຕ໋ອກທຸກລາຍການ +50');
+    }
+
+    /* ── Render Order List ─────────────────────────────── */
+    function renderOrders() {
+      const orders    = loadOrders();
+      const container = document.getElementById('ordersList');
+      container.innerHTML = '';
+
+      if (orders.length === 0) {
+        container.innerHTML = `<div class="no-orders">📭 ຍັງບໍ່ມີອໍເດີ. ເລີ່ມຂາຍໄດ້ເລີຍ!</div>`;
+        return;
+      }
+
+      [...orders].reverse().forEach((order, index) => {
+        const num       = orders.length - index;
+        const payTag    = order.paymentType === 'cash'
+          ? `<span class="pay-tag cash">💵 ເງິນສົດ</span>`
+          : `<span class="pay-tag transfer">📱 ໂອນ</span>`;
+        const itemList  = order.items.map(i => `${i.name} ×${i.qty}`).join('  •  ');
+
+        const card = document.createElement('div');
+        card.className = 'order-card';
+        card.innerHTML = `
+          <div class="order-card-head">
+            <span class="order-num">ອໍເດີ #${num}</span>
+            <span class="order-time">${formatTime(order.date)}</span>
+            <span class="order-total">${fKIP(order.total)}</span>
+          </div>
+          <div class="order-meta">
+            ${payTag}
+            <span class="vat-note">ລາຄາກ່ອນ VAT: ${fKIP(order.subtotal)} | VAT: ${fKIP(order.vat)}</span>
+          </div>
+          <div class="order-items-list">${itemList}</div>
+        `;
+        container.appendChild(card);
+      });
+    }
+
+    /* ── Clear All Data ────────────────────────────────── */
+    function confirmClear() {
+      if (confirm('⚠️ ທ່ານແນ່ໃຈບໍ່ທີ່ຈະລຶບຂໍ້ມູນການຂາຍທັງໝົດ?\nການກະທຳນີ້ບໍ່ສາມາດຍ້ອນກັບໄດ້.')) {
+        clearAllOrders();
+        renderStats();
+        renderOrders();
+        showToast('🗑️ ລຶບຂໍ້ມູນທັງໝົດແລ້ວ');
+      }
+    }
+
+    /* ── Toast ─────────────────────────────────────────── */
+    let toastTimer = null;
+    function showToast(msg) {
+      const t = document.getElementById('toast');
+      t.textContent = msg;
+      t.classList.add('show');
+      clearTimeout(toastTimer);
+      toastTimer = setTimeout(() => t.classList.remove('show'), 2800);
+    }
+
+    /* ── Initialize ────────────────────────────────────── */
+    renderStats();
+    renderStock();
+    renderOrders();
+  </script>
+
+</body>
+</html>

@@ -1,0 +1,127 @@
+<!DOCTYPE html>
+<!-- ============================================================
+     FILE: index.html
+     POS — Selling Interface
+     ============================================================ -->
+<html lang="lo">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>🛒 School Sale POS</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Noto+Sans+Lao:wght@400;500;600;700;800;900&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="css/style.css">
+</head>
+<body>
+
+  <!-- ── Header ─────────────────────────────────────────── -->
+  <header class="app-header">
+    <h1>🏫 School <span class="accent">Sale</span></h1>
+    <nav class="header-nav">
+      <a href="index.html" class="active">🛒 ຂາຍ</a>
+      <a href="login.html">📊 ຜູ້ດູແລ</a>
+    </nav>
+  </header>
+
+  <!-- ── Main POS Layout ────────────────────────────────── -->
+  <div class="pos-layout">
+
+    <!-- LEFT: Product Menu Grid -->
+    <div class="menu-panel">
+      <div class="section-label">🛍️ ແຕະເພື່ອເພີ່ມສິນຄ້າ</div>
+      <div class="menu-grid" id="menuGrid">
+        <!-- Built by pos.js -->
+      </div>
+    </div>
+
+    <!-- RIGHT: Cart + Payment -->
+    <div class="cart-panel">
+
+      <!-- Cart Header -->
+      <div class="cart-head">
+        <h2>🛒 ລາຍການສັ່ງ</h2>
+        <span class="cart-badge" id="cartBadge">0 ລາຍການ</span>
+      </div>
+
+      <!-- Cart Items -->
+      <div class="cart-body" id="cartBody">
+        <div class="cart-empty" id="cartEmpty">
+          <div class="ce-icon">🛒</div>
+          <p>ແຕະສິນຄ້າເພື່ອເລີ່ມ!</p>
+        </div>
+        <!-- Cart rows injected by pos.js -->
+      </div>
+
+      <!-- Cart Footer -->
+      <div class="cart-footer">
+
+        <!-- VAT Summary -->
+        <div class="summary-row">
+          <span class="summary-label">ລາຄາກ່ອນ VAT</span>
+          <span class="summary-value" id="dispSubtotal">0 KIP</span>
+        </div>
+        <div class="summary-row">
+          <span class="summary-label">VAT (10%)</span>
+          <span class="summary-value" id="dispVAT">0 KIP</span>
+        </div>
+        <div class="divider"></div>
+        <div class="summary-row total-main">
+          <span class="summary-label">ລວມທັງໝົດ</span>
+          <span class="summary-value" id="dispTotal">0 KIP</span>
+        </div>
+
+        <!-- Payment Type Selection -->
+        <div class="section-label" style="margin-top:4px; margin-bottom:4px;">ປະເພດຊຳລະ</div>
+        <div class="pay-type-row">
+          <button class="pay-type-btn" id="btnCash">
+            💵 ເງິນສົດ
+          </button>
+          <button class="pay-type-btn" id="btnTransfer">
+            📱 ໂອນເງິນ
+          </button>
+        </div>
+
+        <!-- Cash: Received / Change (shown only for cash) -->
+        <div class="pay-input-row" id="payInputSection" style="display:none">
+          <label for="receivedInput">ຮັບ (KIP)</label>
+          <input
+            class="money-input"
+            type="number"
+            id="receivedInput"
+            placeholder="ເຊັ່ນ: 20000"
+            min="0"
+            step="1000"
+          >
+        </div>
+
+        <!-- Change display -->
+        <div class="change-box" id="changeBox" style="display:none">
+          <span class="change-lbl" id="changeLbl">💰 ທອນເງິນ</span>
+          <span class="change-val" id="changeVal">0 KIP</span>
+        </div>
+
+        <!-- Pay Button -->
+        <button class="btn-pay" id="payBtn">
+          ✅ ຊຳລະເງິນ
+        </button>
+
+        <!-- Reset Button -->
+        <button class="btn-reset" id="resetBtn">
+          🗑️ ລ້າງລາຍການ
+        </button>
+
+      </div>
+    </div>
+  </div>
+
+  <!-- Toast -->
+  <div id="toast"></div>
+
+  <!-- Scripts: ES modules — firebase.js is imported by storage.js -->
+  <script type="module" src="js/storage.js"></script>
+  <script type="module" src="js/pos.js"></script>
+  <script type="module" src="js/payment.js"></script>
+
+</body>
+</html>
